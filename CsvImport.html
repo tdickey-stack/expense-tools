@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <base target="_top">
+
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+
+    <style>
+      body {
+        font-family: 'Montserrat', Arial, sans-serif;
+        padding: 16px;
+        margin: 0;
+        color: #1f2937;
+        background: #f8fafc;
+      }
+
+      .card {
+        background: #ffffff;
+        border: 1px solid #e5e7eb;
+        border-radius: 16px;
+        padding: 20px;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+      }
+
+      .logo {
+        display: block;
+        max-width: 220px;
+        height: auto;
+        margin: 0 auto 20px;
+      }
+
+      h1 {
+        margin: 0 0 12px;
+        font-size: 24px;
+        font-weight: 700;
+        color: #111827;
+      }
+
+      h2 {
+        margin: 0 0 10px;
+        font-size: 16px;
+        font-weight: 600;
+        color: #111827;
+      }
+
+      p {
+        margin: 0 0 16px;
+        font-size: 14px;
+        font-weight: 400;
+        color: #4b5563;
+        line-height: 1.5;
+      }
+
+      input[type="file"] {
+        display: none;
+      }
+
+      .file-button,
+      button {
+        width: 100%;
+        border: none;
+        border-radius: 999px;
+        padding: 14px 20px;
+        font-size: 14px;
+        font-weight: 600;
+        font-family: 'Montserrat', Arial, sans-serif;
+        cursor: pointer;
+        background: #EF3B2D;
+        color: #FFFFFF;
+        text-align: center;
+        display: inline-block;
+        box-sizing: border-box;
+        transition: 0.2s ease;
+      }
+
+      .file-button:hover,
+      button:hover {
+        opacity: 0.92;
+      }
+
+      button:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+      }
+
+      .file-name {
+        margin: 10px 0 18px;
+        font-size: 13px;
+        color: #6b7280;
+        text-align: center;
+      }
+
+      .progress-wrap {
+        display: none;
+        width: 100%;
+        height: 10px;
+        background: #e5e7eb;
+        border-radius: 999px;
+        overflow: hidden;
+        margin-top: 16px;
+      }
+
+      .progress-bar {
+        width: 0%;
+        height: 100%;
+        background: #EF3B2D;
+        border-radius: 999px;
+        transition: width 0.4s ease;
+      }
+
+      #status {
+        margin-top: 14px;
+        font-size: 13px;
+      }
+
+      .success {
+        color: #047857;
+      }
+
+      .error {
+        color: #b91c1c;
+      }
+
+label {
+  display: block;
+  margin: 14px 0 6px;
+  font-weight: 600;
+}
+
+select,
+input[type="text"] {
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid #d1d5db;
+  border-radius: 10px;
+  padding: 10px;
+  font-family: 'Montserrat', Arial, sans-serif;
+  font-size: 13px;
+}
+
+.detail-box {
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 12px;
+  margin: 14px 0;
+}
+
+.detail-box p {
+  margin: 4px 0;
+}
+
+.button-row {
+  display: flex;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.secondary {
+  background: #374151;
+}
+
+.muted {
+  background: #9ca3af;
+}
+
+.loading {
+  color: #4b5563;
+}
+
+    </style>
+  </head>
+
+  <body>
+    <div class="card">
+      <img
+        src="https://media.thechurchcoassets.com/accounts/4378/66632b98-d6c1-499b-8b61-f842224fe73b-./CP-Logo_CrossPointe-Red.png"
+        alt="CrossPointe Logo"
+        class="logo"
+      />
+
+      <h1>Import Bank CSV</h1>
+
+      <h2>Select .CSV</h2>
+
+      <p>
+        Select your First Citizens statement export. The importer will pull
+        Value Date, Transaction Detail, and Amount.
+      </p>
+
+      <label for="csvFile" class="file-button">
+        Choose File
+      </label>
+
+      <input
+        type="file"
+        id="csvFile"
+        accept=".csv"
+        onchange="updateFileName()"
+      >
+
+      <div id="fileName" class="file-name">
+        No file selected
+      </div>
+
+      <button id="importButton" onclick="uploadCsv()">
+        Import CSV
+      </button>
+
+      <div class="progress-wrap" id="progressWrap">
+        <div class="progress-bar" id="progressBar"></div>
+      </div>
+
+      <p id="status"></p>
+    </div>
+
+    <script>
+      function updateFileName() {
+        const fileInput = document.getElementById('csvFile');
+        const fileName = document.getElementById('fileName');
+
+        fileName.textContent = fileInput.files.length
+          ? fileInput.files[0].name
+          : 'No file selected';
+      }
+
+      function uploadCsv() {
+  const fileInput = document.getElementById('csvFile');
+  const status = document.getElementById('status');
+  const button = document.getElementById('importButton');
+  const progressWrap = document.getElementById('progressWrap');
+  const progressBar = document.getElementById('progressBar');
+
+  const loadingMessages = [
+    "Counting pennies...",
+    "Reconciling your sins... I mean expenses...",
+    "Untangling CSV spaghetti...",
+    "Really? You spent money on that?...",
+    "Consulting the ledger...",
+    "Almost there, stay with me...",
+    "Making our accountants proud...",
+    "Adjusting your monthly tithe payment...",
+    "Multiplying loaves...and line items...",
+    "Studying Numbers 1:2...",
+    "Bueller...Bueller..."
+  ];
+
+  let messageInterval;
+
+  function startLoadingMessages() {
+    const shuffled = [...loadingMessages].sort(() => Math.random() - 0.5);
+
+    let index = 0;
+    status.textContent = shuffled[index];
+
+    messageInterval = setInterval(() => {
+      index = (index + 1) % shuffled.length;
+      status.textContent = shuffled[index];
+    }, 1200);
+  }
+
+  function stopLoadingMessages() {
+    clearInterval(messageInterval);
+  }
+
+  status.className = '';
+
+  if (!fileInput.files.length) {
+    status.textContent = 'Please select a CSV file first.';
+    status.className = 'error';
+    return;
+  }
+
+  const file = fileInput.files[0];
+  const reader = new FileReader();
+
+  // UI setup
+  button.disabled = true;
+  button.textContent = 'Importing...';
+
+  progressWrap.style.display = 'block';
+  progressBar.style.width = '10%';
+
+  startLoadingMessages();
+
+  // Fake progress animation
+  setTimeout(() => {
+    progressBar.style.width = '30%';
+  }, 1000);
+
+  setTimeout(() => {
+    progressBar.style.width = '55%';
+  }, 3000);
+
+  setTimeout(() => {
+    progressBar.style.width = '75%';
+  }, 5000);
+
+  setTimeout(() => {
+    progressBar.style.width = '90%';
+  }, 6500);
+
+  reader.onload = function(e) {
+    google.script.run
+      .withSuccessHandler(function(message) {
+        stopLoadingMessages();
+        progressBar.style.width = '100%';
+
+        status.textContent = 'Import complete ✓';
+        status.className = 'success';
+
+        button.disabled = false;
+        button.textContent = 'Import CSV';
+
+        setTimeout(function() {
+          startRecurringDetectionInThisDialog();
+        }, 700);
+      })
+      .withFailureHandler(function(error) {
+        stopLoadingMessages();
+        progressBar.style.width = '100%';
+
+        status.textContent = 'Import failed: ' + error.message;
+        status.className = 'error';
+
+        button.disabled = false;
+        button.textContent = 'Import CSV';
+      })
+      .importBankCsv(e.target.result);
+  };
+
+  reader.readAsText(file);
+}
+
+      function startRecurringDetectionInThisDialog() {
+  google.script.host.setWidth(650);
+  google.script.host.setHeight(520);
+
+  document.body.innerHTML = `
+    <div class="card">
+      <img
+        src="https://media.thechurchcoassets.com/accounts/4378/66632b98-d6c1-499b-8b61-f842224fe73b-./CP-Logo_CrossPointe-Red.png"
+        alt="CrossPointe Logo"
+        class="logo"
+      />
+
+      <h1>Recurring Transaction Detection</h1>
+
+      <p>
+        Checking for recurring expenses that may have been missed during import.
+      </p>
+
+      <div id="content">Loading...</div>
+      <p id="status"></p>
+    </div>
+  `;
+
+  loadRecurringDetection();
+}
+let candidate = null;
+let candidates = [];
+let currentCandidateIndex = 0;
+
+let accountOptions = [];
+let ministrySubaccounts = [];
+let operatingMap = {};
+let designatedAccounts = [];
+
+function loadRecurringDetection() {
+  showStatus('Scanning for recurring transactions...', 'loading');
+
+  google.script.run
+    .withSuccessHandler(function(data) {
+      if (!data) {
+        document.getElementById('content').innerHTML =
+          '<p class="error">No data returned from the script.</p>';
+        showStatus('', '');
+        return;
+      }
+
+      if (data.done) {
+        document.getElementById('content').innerHTML = `
+          <p>${escapeHtml(data.message)}</p>
+          <div class="button-row">
+            <button onclick="google.script.host.close()">Close</button>
+          </div>
+        `;
+        showStatus('', '');
+        return;
+      }
+
+      candidates = data.candidates || [];
+      currentCandidateIndex = 0;
+
+      accountOptions = data.accountOptions || [];
+      ministrySubaccounts = data.ministrySubaccounts || [];
+      operatingMap = data.operatingMap || {};
+      designatedAccounts = data.designatedAccounts || {};
+
+      showCurrentCandidate();
+    })
+    .withFailureHandler(function(error) {
+      document.getElementById('content').innerHTML = `
+        <p class="error"><b>Failed to load detected transactions.</b></p>
+        <p>${escapeHtml(error.message)}</p>
+      `;
+      showStatus('', '');
+    })
+    .getRecurringDetectionCandidatesForUi();
+}
+
+function showCurrentCandidate() {
+  if (currentCandidateIndex >= candidates.length) {
+    document.getElementById('content').innerHTML = `
+      <p>No more recurring transaction suggestions.</p>
+      <div class="button-row">
+        <button onclick="google.script.host.close()">Close</button>
+      </div>
+    `;
+    showStatus('', '');
+    return;
+  }
+
+  candidate = candidates[currentCandidateIndex];
+  renderRecurringCandidate();
+
+  showStatus(
+    `Suggestion ${currentCandidateIndex + 1} of ${candidates.length}`,
+    'loading'
+  );
+}
+
+function renderRecurringCandidate() {
+  document.getElementById('content').innerHTML = `
+    <div class="detail-box">
+      <p><b>Vendor:</b> ${escapeHtml(candidate.vendorDisplay)}</p>
+      <p><b>Amount:</b> ${formatCurrency(candidate.amount)}</p>
+      <p><b>Day of Month:</b> ${escapeHtml(candidate.dayOfMonth)}</p>
+      <p><b>Months Found:</b> ${escapeHtml(candidate.monthCount)}</p>
+    </div>
+
+    <label for="account">Account</label>
+    <select id="account"></select>
+
+    <label for="subaccount">Subaccount</label>
+    <select id="subaccount"></select>
+
+    <label for="reason">Reason for Expense</label>
+    <input
+      type="text"
+      id="reason"
+      placeholder="Monthly subscription, supplies, etc."
+      value="${escapeHtml(candidate.reason || '')}"
+    >
+
+    <div class="button-row">
+      <button id="addButton" onclick="submitDecision('add')">Add Recurring</button>
+      <button class="secondary" onclick="submitDecision('skip')">Skip</button>
+      <button class="muted" onclick="submitDecision('never')">Never Ask Again</button>
+    </div>
+  `;
+
+  const accountSelect = document.getElementById('account');
+  accountSelect.innerHTML = buildOptions(accountOptions, candidate.account || '', 'Select account');
+
+  updateSubaccounts();
+  accountSelect.onchange = updateSubaccounts;
+}
+
+function updateSubaccounts() {
+  const account = document.getElementById('account').value;
+  const subSelect = document.getElementById('subaccount');
+
+  let options = [];
+
+  if (account === 'Designated') {
+    options = designatedAccounts;
+  } else if (operatingMap[account]) {
+    options = operatingMap[account];
+  } else {
+    options = ministrySubaccounts;
+  }
+
+  subSelect.innerHTML = buildOptions(options, candidate.subaccount || '', 'Select subaccount');
+}
+
+function submitDecision(action) {
+  const account = document.getElementById('account')?.value || '';
+  const subaccount = document.getElementById('subaccount')?.value || '';
+  const reason = document.getElementById('reason')?.value || '';
+
+  if (action === 'add' && (!account || !subaccount)) {
+    showStatus('Please choose an account and subaccount before adding.', 'error');
+    return;
+  }
+
+  if (action === 'skip') {
+    showStatus('Skipped. Loading next suggestion...', 'success');
+    currentCandidateIndex++;
+
+    setTimeout(function() {
+      showCurrentCandidate();
+    }, 250);
+
+    return;
+  }
+
+  setButtonsDisabled(true);
+
+  google.script.run
+    .withSuccessHandler(function(message) {
+      const statusMessage =
+        action === 'add'
+          ? 'Recurring Transaction Added'
+          : 'Vendor marked as Never Ask Again';
+
+      showStatus(statusMessage, 'success');
+
+      currentCandidateIndex++;
+
+      setTimeout(function() {
+        showCurrentCandidate();
+      }, 350);
+    })
+    .withFailureHandler(function(error) {
+      showStatus('Decision failed: ' + error.message, 'error');
+      setButtonsDisabled(false);
+    })
+    .handleRecurringDetectionDecision({
+      action,
+      candidate,
+      account,
+      subaccount,
+      reason
+    });
+}
+
+function setButtonsDisabled(disabled) {
+  document.querySelectorAll('button').forEach(button => {
+    button.disabled = disabled;
+  });
+}
+
+function buildOptions(values, selectedValue, placeholder) {
+  if (!Array.isArray(values)) values = [];
+
+  let html = `<option value="">${escapeHtml(placeholder)}</option>`;
+
+  values.forEach(value => {
+    if (!value) return;
+
+    const safeValue = String(value);
+    const selected = safeValue === selectedValue ? 'selected' : '';
+
+    html += `<option value="${escapeHtml(safeValue)}" ${selected}>${escapeHtml(safeValue)}</option>`;
+  });
+
+  return html;
+}
+
+function formatCurrency(value) {
+  const number = Number(value) || 0;
+
+  return number.toLocaleString('en-US', {
+    style: 'currency',
+    currency: 'USD'
+  });
+}
+
+function showStatus(message, type) {
+  const status = document.getElementById('status');
+  status.textContent = message;
+  status.className = type || '';
+}
+
+function escapeHtml(value) {
+  return String(value || '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+    </script>
+  </body>
+</html>
