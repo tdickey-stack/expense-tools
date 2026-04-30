@@ -1,0 +1,819 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <base target="_top">
+
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+
+    <style>
+      body {
+        font-family: 'Montserrat', Arial, sans-serif;
+        padding: 16px;
+        margin: 0;
+        color: #1f2937;
+        background: #f8fafc;
+      }
+
+      .card {
+        background: #ffffff;
+        border: 1px solid #e5e7eb;
+        border-radius: 16px;
+        padding: 20px;
+        box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+      }
+
+      .logo {
+        display: block;
+        max-width: 220px;
+        height: auto;
+        margin: 0 auto 20px;
+      }
+
+      h1 {
+        margin: 0 0 12px;
+        font-size: 24px;
+        font-weight: 700;
+        color: #111827;
+      }
+
+      p, label {
+        font-size: 14px;
+        color: #4b5563;
+        line-height: 1.5;
+      }
+
+      label {
+        display: block;
+        margin: 14px 0 6px;
+        font-weight: 600;
+      }
+
+      select,
+      input {
+        width: 100%;
+        box-sizing: border-box;
+        border: 1px solid #d1d5db;
+        border-radius: 10px;
+        padding: 10px;
+        font-family: 'Montserrat', Arial, sans-serif;
+        font-size: 13px;
+      }
+
+      .mode-row {
+        display: flex;
+        gap: 12px;
+        margin: 16px 0;
+      }
+
+      .mode-card {
+        flex: 1;
+        border: 1px solid #d1d5db;
+        border-radius: 14px;
+        padding: 12px;
+        cursor: pointer;
+        background: #ffffff;
+      }
+
+      .mode-card input {
+        width: auto;
+        margin-right: 8px;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 18px;
+      }
+
+      th {
+        text-align: left;
+        font-size: 12px;
+        font-weight: 600;
+        color: #4b5563;
+        padding: 8px 4px;
+      }
+
+      td {
+        padding: 6px 4px;
+        vertical-align: middle;
+      }
+
+      .button-row {
+        display: flex;
+        gap: 10px;
+        margin-top: 18px;
+      }
+
+      button {
+        border: none;
+        border-radius: 999px;
+        padding: 12px 18px;
+        font-size: 14px;
+        font-weight: 600;
+        font-family: 'Montserrat', Arial, sans-serif;
+        cursor: pointer;
+        background: #EF3B2D;
+        color: #FFFFFF;
+      }
+
+      button:hover {
+        opacity: 0.92;
+      }
+
+      button:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+      }
+
+      .secondary {
+        background: #374151;
+      }
+
+      .remove-btn {
+        width: 100%;
+        padding: 10px 12px;
+        background: #9ca3af;
+      }
+
+      .summary {
+        margin-top: 10px;
+        font-size: 13px;
+        color: #4b5563;
+      }
+
+      #status {
+        margin-top: 14px;
+        font-size: 13px;
+      }
+
+      .success {
+        color: #047857;
+      }
+
+      .error {
+        color: #b91c1c;
+      }
+
+      .balanced {
+  color: #047857;
+  font-weight: 700;
+  background: #ecfdf5;
+  border: 1px solid #a7f3d0;
+  border-radius: 10px;
+  padding: 10px;
+}
+
+.unbalanced {
+  color: #92400e;
+  font-weight: 600;
+  background: #fffbeb;
+  border: 1px solid #fde68a;
+  border-radius: 10px;
+  padding: 10px;
+}
+    </style>
+  </head>
+
+  <body>
+    <div class="card">
+      <img
+        src="https://media.thechurchcoassets.com/accounts/4378/66632b98-d6c1-499b-8b61-f842224fe73b-./CP-Logo_CrossPointe-Red.png"
+        alt="CrossPointe Logo"
+        class="logo"
+      />
+
+      <h1>Split Transaction</h1>
+
+      <p>
+        Select a transaction, choose how you want to split it, then assign each portion to the correct account.
+      </p>
+
+      <label for="transactionSelect">Transaction</label>
+      <select id="transactionSelect" onchange="updateSelectedTransaction()">
+        <option value="">Loading transactions...</option>
+      </select>
+
+      <div id="transactionSummary" class="summary"></div>
+
+      <div class="mode-row">
+        <label class="mode-card">
+          <input type="radio" name="splitMode" value="percentage" checked onchange="updateModeLabels()">
+          Split by Percentage
+        </label>
+
+        <label class="mode-card">
+          <input type="radio" name="splitMode" value="amount" onchange="updateModeLabels()">
+          Split by Exact Amount
+        </label>
+      </div>
+
+      <table>
+        <thead>
+          <tr>
+            <th style="width: 30%;">Account</th>
+            <th style="width: 30%;">Subaccount</th>
+            <th style="width: 20%;" id="valueHeader">Percent</th>
+            <th style="width: 20%;">Remove</th>
+          </tr>
+        </thead>
+        <tbody id="splitBody"></tbody>
+      </table>
+
+      <div class="summary" id="splitSummary"></div>
+
+      <label for="expenseReason">Reason for Expense</label>
+<input
+  type="text"
+  id="expenseReason"
+  placeholder="Reason for this expense"
+>
+
+      <div class="button-row">
+        <button class="secondary" onclick="addSplitRow()">Add Account</button>
+        <button class="secondary" onclick="autoFillRemaining()">Auto-Fill Remaining</button>
+        <button id="applyButton" onclick="applySplit()" disabled>Apply Split</button>
+      </div>
+
+      <p id="status"></p>
+    </div>
+
+    <script>
+      let transactions = [];
+      let accountOptions = [];
+      let ministrySubaccounts = [];
+      let operatingMap = {};
+      let designatedAccounts = [];
+      let autoFilledInput = null;
+
+      function addSplitRow(account = '', subaccount = '', value = '') {
+  if (!accountOptions || accountOptions.length === 0) {
+    showStatus('Account options not loaded yet.', 'error');
+    return;
+  }
+
+  const tbody = document.getElementById('splitBody');
+  const tr = document.createElement('tr');
+
+  tr.innerHTML = `
+    <td>
+      <select class="account" onchange="updateSubaccountDropdown(this)">
+        ${buildOptions(accountOptions, account, 'Select account')}
+      </select>
+    </td>
+    <td>
+      <select class="subaccount"></select>
+    </td>
+    <td>
+      <input type="number" class="splitValue" value="${escapeHtml(value)}" step="0.01" oninput="handleSplitValueInput(this)">
+    </td>
+    <td>
+      <button class="remove-btn" onclick="removeSplitRow(this)">X</button>
+    </td>
+  `;
+
+  tbody.appendChild(tr);
+
+  const accountSelect = tr.querySelector('.account');
+  const subaccountSelect = tr.querySelector('.subaccount');
+  const splitValueInput = tr.querySelector('.splitValue');
+  preventNumberScroll(splitValueInput);
+  tr.querySelectorAll('select, input').forEach(element => {
+  element.addEventListener('keydown', handleSplitRowKeydown);
+});
+
+  populateSubaccountDropdown(accountSelect.value, subaccountSelect, subaccount);
+  subaccountSelect.onchange = updateSplitSummary;
+
+  updateModeLabels();
+  updateSplitSummary();
+}
+
+function removeSplitRow(button) {
+  const rows = document.querySelectorAll('#splitBody tr');
+
+  if (rows.length <= 2) {
+    showStatus('A split transaction must have at least two splits.', 'error');
+    return;
+  }
+
+  button.closest('tr').remove();
+  updateSplitSummary();
+}
+
+      function loadSplitData() {
+        google.script.run
+          .withSuccessHandler(function(data) {
+            try {
+              if (!data) {
+                throw new Error('No data returned.');
+              }
+
+              transactions = data.transactions || [];
+              accountOptions = data.accountOptions || [];
+              ministrySubaccounts = data.ministrySubaccounts || [];
+              operatingMap = data.operatingMap || {};
+              designatedAccounts = data.designatedAccounts || [];
+
+              populateTransactions();
+
+              if (accountOptions.length > 0) {
+                addSplitRow();
+                addSplitRow();
+              }
+
+              updateModeLabels();
+
+              showStatus(`Loaded ${transactions.length} transactions`, 'success');
+            } catch (err) {
+              document.getElementById('transactionSelect').innerHTML =
+                '<option value="">UI Error</option>';
+              showStatus('UI error: ' + err.message, 'error');
+            }
+          })
+          .withFailureHandler(function(error) {
+            document.getElementById('transactionSelect').innerHTML =
+              '<option value="">Failed to load</option>';
+            showStatus('Error: ' + error.message, 'error');
+          })
+          .getSplitTxData();
+      }
+
+      function populateTransactions() {
+        const select = document.getElementById('transactionSelect');
+        select.innerHTML = '<option value="">Select transaction</option>';
+
+        transactions.forEach(tx => {
+          const option = document.createElement('option');
+          option.value = tx.rowNumber;
+          option.textContent = tx.label;
+          select.appendChild(option);
+        });
+      }
+
+      function updateSelectedTransaction() {
+  const selectedRow = Number(document.getElementById('transactionSelect').value);
+  const tx = transactions.find(item => Number(item.rowNumber) === selectedRow);
+  const summary = document.getElementById('transactionSummary');
+
+  if (!tx) {
+    summary.textContent = '';
+    updateSplitSummary();
+    return;
+  }
+
+  const amount = Math.abs(getTransactionAmount(tx));
+summary.textContent = `Selected amount: ${formatCurrency(amount)}`;
+
+  updateSplitSummary();
+}
+
+      function updateSubaccountDropdown(accountSelect) {
+  const row = accountSelect.closest('tr');
+  const subaccountSelect = row.querySelector('.subaccount');
+
+  populateSubaccountDropdown(accountSelect.value, subaccountSelect, '');
+
+  subaccountSelect.onchange = updateSplitSummary; // 👈 add this
+  updateSplitSummary(); // 👈 and this
+}
+
+      function populateSubaccountDropdown(account, subaccountSelect, selectedValue) {
+        let options = [];
+
+        if (account === 'Designated') {
+          options = designatedAccounts;
+        } else if (operatingMap[account]) {
+          options = operatingMap[account];
+        } else {
+          options = ministrySubaccounts;
+        }
+
+        subaccountSelect.innerHTML = buildOptions(options, selectedValue, 'Select subaccount');
+      }
+
+      function updateModeLabels() {
+        const mode = getMode();
+        const header = document.getElementById('valueHeader');
+
+        header.textContent = mode === 'percentage' ? 'Percent' : 'Amount';
+
+        document.querySelectorAll('.splitValue').forEach(input => {
+          input.placeholder = mode === 'percentage' ? '50' : '125.00';
+        });
+
+        updateSplitSummary();
+      }
+
+      /*
+      ==Old SplitSummary Function==
+      function updateSplitSummary() {
+  const mode = getMode();
+  const rows = Array.from(document.querySelectorAll('#splitBody tr'));
+
+  // Sum entered values
+  const total = rows.reduce((sum, row) => {
+    const value = Number(row.querySelector('.splitValue').value);
+    return sum + (isNaN(value) ? 0 : value);
+  }, 0);
+
+  const selectedRow = Number(document.getElementById('transactionSelect').value);
+  const tx = transactions.find(item => Number(item.rowNumber) === selectedRow);
+  const summary = document.getElementById('splitSummary');
+
+  if (mode === 'percentage') {
+    summary.textContent = `Current split total: ${total.toFixed(2)}%`;
+    return;
+  }
+
+  if (!tx) {
+    summary.textContent = `Current split total: ${formatCurrency(total)}`;
+    return;
+  }
+
+  // Safely parse the transaction amount
+  const needed = Math.abs(parseCurrency(tx.amount || tx.amountText));
+  const remaining = needed - total;
+
+  summary.textContent =
+    `Current split total: ${formatCurrency(total)} / Remaining: ${formatCurrency(remaining)}`;
+}
+*/
+
+function updateSplitSummary() {
+  const mode = getMode();
+  const rows = Array.from(document.querySelectorAll('#splitBody tr'));
+  const summary = document.getElementById('splitSummary');
+
+  const total = rows.reduce((sum, row) => {
+    const value = Number(row.querySelector('.splitValue').value);
+    return sum + (isNaN(value) ? 0 : value);
+  }, 0);
+
+  const selectedRow = Number(document.getElementById('transactionSelect').value);
+  const tx = transactions.find(item => Number(item.rowNumber) === selectedRow);
+
+  let target = mode === 'percentage' ? 100 : 0;
+
+  if (mode === 'amount' && tx) {
+    target = Math.abs(getTransactionAmount(tx));
+  }
+
+  const remaining = target - total;
+  const isBalanced = Math.abs(remaining) <= 0.01;
+
+  if (mode === 'percentage') {
+    summary.textContent = isBalanced
+      ? `Balanced: ${total.toFixed(2)}%`
+      : `Current split total: ${total.toFixed(2)}% / Remaining: ${remaining.toFixed(2)}%`;
+  } else if (!tx) {
+    summary.textContent = `Current split total: ${formatCurrency(total)}`;
+  } else {
+    summary.textContent = isBalanced
+      ? `Balanced: ${formatCurrency(total)}`
+      : `Current split total: ${formatCurrency(total)} / Remaining: ${formatCurrency(remaining)}`;
+  }
+
+  summary.className = 'summary ' + (isBalanced ? 'balanced' : 'unbalanced');
+
+  updateApplyButtonState();
+}
+
+      function applySplit() {
+        const rowNumber = document.getElementById('transactionSelect').value;
+        const mode = getMode();
+        const rows = Array.from(document.querySelectorAll('#splitBody tr'));
+        const button = document.getElementById('applyButton');
+
+        if (!rowNumber) {
+          showStatus('Please select a transaction.', 'error');
+          return;
+        }
+
+        const expenseReason = document.getElementById('expenseReason').value.trim();
+
+        const splits = rows
+          .map(row => ({
+          account: row.querySelector('.account').value.trim(),
+          subaccount: row.querySelector('.subaccount').value.trim(),
+          value: row.querySelector('.splitValue').value.trim(),
+          reason: expenseReason
+  }))
+          .filter(split => split.account || split.subaccount || split.value || split.reason);
+
+        if (splits.length < 2) {
+          showStatus('Please add at least two split accounts.', 'error');
+          return;
+        }
+
+        const incomplete = splits.some(split =>
+          !split.account || !split.subaccount || split.value === ''
+        );
+
+        if (incomplete) {
+          showStatus('Please complete all account, subaccount, and value fields or remove incomplete rows.', 'error');
+          return;
+        }
+
+const balance = getBalanceState();
+
+if (!balance.isBalanced) {
+  showStatus('Split must be balanced before submitting.', 'error');
+  updateSplitSummary();
+  return;
+}
+
+        button.disabled = true;
+        button.textContent = 'Applying...';
+        showStatus('Applying split...', '');
+
+        google.script.run
+          .withSuccessHandler(function(message) {
+            showStatus(message, 'success');
+            button.disabled = false;
+            button.textContent = 'Apply Split';
+
+            setTimeout(function() {
+              google.script.host.close();
+            }, 500);
+          })
+          .withFailureHandler(function(error) {
+            showStatus('Split failed: ' + error.message, 'error');
+            button.disabled = false;
+            button.textContent = 'Apply Split';
+          })
+          .applySplitTx({
+            rowNumber,
+            mode,
+            splits
+          });
+      }
+
+      function getMode() {
+        return document.querySelector('input[name="splitMode"]:checked').value;
+      }
+
+      function buildOptions(values, selectedValue, placeholder) {
+        if (!Array.isArray(values)) values = [];
+
+        let html = `<option value="">${placeholder}</option>`;
+
+        values.forEach(value => {
+          if (!value) return;
+
+          const safeValue = String(value);
+          const selected = safeValue === selectedValue ? 'selected' : '';
+
+          html += `<option value="${escapeHtml(safeValue)}" ${selected}>${escapeHtml(safeValue)}</option>`;
+        });
+
+        return html;
+      }
+
+      function formatCurrency(value) {
+        const number = Number(value) || 0;
+
+        return number.toLocaleString('en-US', {
+          style: 'currency',
+          currency: 'USD'
+        });
+      }
+
+      function showStatus(message, type) {
+        const status = document.getElementById('status');
+        status.textContent = message;
+        status.className = type;
+      }
+
+      function escapeHtml(value) {
+        return String(value)
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;');
+      }
+
+      loadSplitData();
+
+      function parseCurrency(value) {
+  const text = String(value || '')
+    .trim()
+    .replace(/\$\s*\(([\d,]+\.\d{2})\)/, '-$1') // handles "$ (295.00)"
+    .replace(/\(([\d,]+\.\d{2})\)/, '-$1')      // handles "(295.00)"
+    .replace(/[$,\s]/g, '');
+
+  return Number(text) || 0;
+}
+
+function getTransactionAmount(tx) {
+  // Prefer direct numeric amount if available
+  if (tx.amount !== undefined && tx.amount !== null && Number(tx.amount) !== 0) {
+    return Number(tx.amount);
+  }
+
+  // Then try amountText
+  if (tx.amountText) {
+    return parseCurrency(tx.amountText);
+  }
+
+  // Then parse the amount from the label
+  if (tx.label) {
+    const label = String(tx.label);
+
+    // Finds values like -$500.00, $500.00, -500.00, 500.00
+    const match = label.match(/-?\$?\d{1,3}(?:,\d{3})*\.\d{2}/);
+
+    if (match) {
+      return parseCurrency(match[0]);
+    }
+  }
+
+  return 0;
+}
+
+function handleSplitValueInput(input) {
+  autoFillLastBlankSplit(input);
+  updateSplitSummary();
+}
+
+function getBalanceState() {
+  const mode = getMode();
+  const rows = Array.from(document.querySelectorAll('#splitBody tr'));
+
+  const total = rows.reduce((sum, row) => {
+    const value = Number(row.querySelector('.splitValue').value);
+    return sum + (isNaN(value) ? 0 : value);
+  }, 0);
+
+  const selectedRow = Number(document.getElementById('transactionSelect').value);
+  const tx = transactions.find(item => Number(item.rowNumber) === selectedRow);
+
+  const target = mode === 'percentage'
+    ? 100
+    : tx
+      ? Math.abs(getTransactionAmount(tx))
+      : 0;
+
+  const remaining = target - total;
+
+  return {
+    total,
+    target,
+    remaining,
+    isBalanced: Math.abs(remaining) <= 0.01
+  };
+}
+
+function autoFillRemaining() {
+  const rows = Array.from(document.querySelectorAll('#splitBody tr'));
+
+  if (rows.length === 0) {
+    showStatus('Add at least one split row first.', 'error');
+    return;
+  }
+
+  const mode = getMode();
+  const selectedRow = Number(document.getElementById('transactionSelect').value);
+  const tx = transactions.find(item => Number(item.rowNumber) === selectedRow);
+
+  if (mode === 'amount' && !tx) {
+    showStatus('Select a transaction before auto-filling an amount.', 'error');
+    return;
+  }
+
+  const targetInput =
+    rows.map(row => row.querySelector('.splitValue')).find(input => input.value === '') ||
+    rows[rows.length - 1].querySelector('.splitValue');
+
+  const target = mode === 'percentage'
+    ? 100
+    : Math.abs(getTransactionAmount(tx));
+
+  const totalExceptTarget = rows.reduce((sum, row) => {
+    const input = row.querySelector('.splitValue');
+
+    if (input === targetInput) {
+      return sum;
+    }
+
+    const value = Number(input.value);
+    return sum + (isNaN(value) ? 0 : value);
+  }, 0);
+
+  const remaining = target - totalExceptTarget;
+
+  if (remaining < -0.01) {
+    showStatus('The current split is already over the transaction total.', 'error');
+    updateSplitSummary();
+    return;
+  }
+
+  targetInput.value = Math.max(0, remaining).toFixed(2);
+  showStatus('Remaining value auto-filled.', 'success');
+  updateSplitSummary();
+}
+
+function updateApplyButtonState() {
+  const button = document.getElementById('applyButton');
+  const rowNumber = document.getElementById('transactionSelect').value;
+  const rows = Array.from(document.querySelectorAll('#splitBody tr'));
+
+  const filledSplits = rows
+    .map(row => ({
+      account: row.querySelector('.account').value.trim(),
+      subaccount: row.querySelector('.subaccount').value.trim(),
+      value: row.querySelector('.splitValue').value.trim()
+    }))
+    .filter(split => split.account || split.subaccount || split.value);
+
+  const hasEnoughRows = filledSplits.length >= 2;
+
+  const complete = filledSplits.every(split =>
+    split.account && split.subaccount && split.value !== ''
+  );
+
+  const balance = getBalanceState();
+
+  button.disabled = !rowNumber || !hasEnoughRows || !complete || !balance.isBalanced;
+}
+
+function updateSubaccountDropdown(accountSelect) {
+  const row = accountSelect.closest('tr');
+  const subaccountSelect = row.querySelector('.subaccount');
+
+  populateSubaccountDropdown(accountSelect.value, subaccountSelect, '');
+  updateSplitSummary();
+}
+
+function autoFillLastBlankSplit(changedInput) {
+  const rows = Array.from(document.querySelectorAll('#splitBody tr'));
+  const mode = getMode();
+
+  const selectedRow = Number(document.getElementById('transactionSelect').value);
+  const tx = transactions.find(item => Number(item.rowNumber) === selectedRow);
+
+  if (mode === 'amount' && !tx) {
+    return;
+  }
+
+  const target = mode === 'percentage'
+    ? 100
+    : Math.abs(getTransactionAmount(tx));
+
+  const inputs = rows.map(row => row.querySelector('.splitValue'));
+
+  // If the user edits the auto-filled field, stop treating it as auto-filled.
+  if (changedInput === autoFilledInput) {
+    autoFilledInput = null;
+    updateSplitSummary();
+    return;
+  }
+
+  let targetInput = autoFilledInput;
+
+  if (!targetInput || !inputs.includes(targetInput)) {
+    const blankInputs = inputs.filter(input => input.value === '');
+
+    if (blankInputs.length !== 1) {
+      return;
+    }
+
+    targetInput = blankInputs[0];
+    autoFilledInput = targetInput;
+  }
+
+  const totalExceptTarget = inputs.reduce((sum, input) => {
+    if (input === targetInput) {
+      return sum;
+    }
+
+    const value = Number(input.value);
+    return sum + (isNaN(value) ? 0 : value);
+  }, 0);
+
+  const remaining = target - totalExceptTarget;
+
+  targetInput.value = remaining > 0 ? remaining.toFixed(2) : '';
+}
+
+function preventNumberScroll(input) {
+  input.addEventListener('wheel', function(event) {
+    event.preventDefault();
+  });
+}
+
+function handleSplitRowKeydown(event) {
+  if (event.key !== 'Enter') {
+    return;
+  }
+
+  event.preventDefault();
+  addSplitRow();
+
+  const rows = document.querySelectorAll('#splitBody tr');
+  const newestRow = rows[rows.length - 1];
+
+  newestRow.querySelector('.account').focus();
+}
+    </script>
+  </body>
+</html>
