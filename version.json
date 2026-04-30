@@ -14,6 +14,7 @@
     { "name": "PdfImport", "type": "HTML", "path": "PdfImport.html" },
     { "name": "DetectedRecurringTransaction", "type": "HTML", "path": "DetectedRecurringTransaction.html" },
     { "name": "AddRecurringTransaction", "type": "HTML", "path": "AddRecurringTransaction.html" },
-    { "name": "SplitTransaction_UI", "type": "HTML", "path": "SplitTransaction_UI.html" }
+    { "name": "SplitTransaction_UI", "type": "HTML", "path": "SplitTransaction_UI.html" },
+    { "name": "Updater", "type": "SERVER_JS", "path": "Updater.gs" }
   ]
 }
