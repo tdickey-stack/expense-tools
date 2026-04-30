@@ -1,0 +1,19 @@
+{
+  "version": "1.0",
+  "changelog": [
+    "Added recurring transaction detection after import",
+    "Improved recurring transaction matching",
+    "Added faster recurring detection scan",
+    "Polished recurring detection UI"
+  ],
+  "files": [
+    { "name": "Code", "type": "SERVER_JS", "path": "Code.gs" },
+    { "name": "RecurringTransactions", "type": "SERVER_JS", "path": "RecurringTransactions.gs" },
+    { "name": "SplitTransactions", "type": "SERVER_JS", "path": "SplitTransactions.gs" },
+    { "name": "CsvImport", "type": "HTML", "path": "CsvImport.html" },
+    { "name": "PdfImport", "type": "HTML", "path": "PdfImport.html" },
+    { "name": "DetectedRecurringTransaction", "type": "HTML", "path": "DetectedRecurringTransaction.html" },
+    { "name": "AddRecurringTransaction", "type": "HTML", "path": "AddRecurringTransaction.html" },
+    { "name": "SplitTransaction_UI", "type": "HTML", "path": "SplitTransaction_UI.html" }
+  ]
+}
