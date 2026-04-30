@@ -1,10 +1,11 @@
 {
-  "version": "1.0.1",
+  "version": "1.0.2",
   "changelog": [
     "Added recurring transaction detection after import",
     "Improved recurring transaction matching",
     "Added faster recurring detection scan",
-    "Polished recurring detection UI"
+    "Polished recurring detection UI",
+    "Minor Bug Fixes"
   ],
   "files": [
     { "name": "Code", "type": "SERVER_JS", "path": "Code.gs" },
