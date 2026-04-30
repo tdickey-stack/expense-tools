@@ -19,6 +19,7 @@ function onOpen() {
     .addItem('Resize Sheet', 'resizeVisaSheet')
     .addSeparator()
     .addItem('Check for Updates', 'checkForExpenseToolsUpdates')
+    .addItem('The Update Works', ' ')
     .addToUi();
 }
 
