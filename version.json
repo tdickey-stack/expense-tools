@@ -9,7 +9,7 @@
   "files": [
     { "name": "Code", "type": "SERVER_JS", "path": "Code.gs" },
     { "name": "RecurringTransactions", "type": "SERVER_JS", "path": "RecurringTransactions.gs" },
-    { "name": "SplitTransactions", "type": "SERVER_JS", "path": "SplitTransaction.gs" },
+    { "name": "SplitTransaction", "type": "SERVER_JS", "path": "SplitTransaction.gs" },
     { "name": "CsvImport", "type": "HTML", "path": "CsvImport.html" },
     { "name": "PdfImport", "type": "HTML", "path": "PdfImport.html" },
     { "name": "DetectedRecurringTransaction", "type": "HTML", "path": "DetectedRecurringTransaction.html" },
